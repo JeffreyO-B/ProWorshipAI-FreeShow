@@ -47,11 +47,9 @@
         <Resizeable id="leftPanel">
             <div class="left">
                 {#if page === "show"}
-                    <OperatorLibrary section={operatorSection}>
-                        {#key $activeProfile}
-                            <Projects />
-                        {/key}
-                    </OperatorLibrary>
+                    {#key $activeProfile}
+                        <Projects />
+                    {/key}
                 {:else if page === "edit"}
                     <Navigation />
                 {:else if page === "stage"}
@@ -68,6 +66,8 @@
             {#if page === "show"}
                 {#if $focusMode}
                     <LazyLoad component={() => import("./components/show/focus/FocusMode.svelte")} show={$focusMode} />
+                {:else if operatorSection === "bible" || operatorSection === "ai"}
+                    <OperatorLibrary section={operatorSection} />
                 {:else}
                     <Show />
                 {/if}
