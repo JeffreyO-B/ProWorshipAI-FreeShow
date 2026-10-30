@@ -37,7 +37,7 @@
     async function copyPassage() {
         if (!selection || !loadedBible || !matchingVerses.length) return
         const lines = matchingVerses.map((verse) => verse.chapter + ":" + verse.verse + " " + verse.text)
-        await navigator.clipboard.writeText(formatScriptureReference(selection) + " (" + loadedBible.translation + ")\\n" + lines.join("\\n"))
+        await navigator.clipboard.writeText(formatScriptureReference(selection) + " (" + loadedBible.translation + ")\n" + lines.join("\n"))
     }
     async function importBible(event: Event) {
         const files = (event.currentTarget as HTMLInputElement).files
@@ -144,7 +144,9 @@
     .status-box {display:flex;flex-direction:column;gap:8px}.status-box span {font-size:12px;opacity:.8;line-height:1.5}
     .supporting {font-size:11px;line-height:1.6;opacity:.7}
     .story-list {display:flex;flex-direction:column;gap:5px}.story-list button {padding:9px;text-align:left;background:var(--primary-darker);color:var(--text);border:1px solid var(--primary-lighter);border-radius:7px;cursor:pointer}.story-list small {display:block;opacity:.65;margin-top:3px}
-    .bible-controls {display:flex;gap:8px;flex-wrap:wrap}.bible-controls button {border:1px solid var(--primary-lighter);background:var(--primary-darker);color:var(--text);padding:8px;border-radius:7px;cursor:pointer}.bible-controls button:disabled {opacity:.35;cursor:default}\n    .bible-import {background:var(--primary-darker);border:1px solid var(--primary-lighter);padding:12px;border-radius:9px;display:flex;flex-direction:column;gap:7px}.bible-import input {font-size:12px}.bible-import span {font-size:12px;opacity:.7}.import-error {font-size:12px;color:#ffaaa8}.passage-result {padding:15px 20px;background:var(--primary-darker);border-radius:10px;border:1px solid var(--primary-lighter);line-height:1.65}.passage-result h3 {font-size:17px}.passage-result p {margin:12px 0}.passage-result strong {color:#b898e7;margin-right:6px}\n    .pw-slide-editor {display:flex;flex-direction:column;gap:12px;margin-top:15px}
+    .bible-controls {display:flex;gap:8px;flex-wrap:wrap}.bible-controls button {border:1px solid var(--primary-lighter);background:var(--primary-darker);color:var(--text);padding:8px;border-radius:7px;cursor:pointer}.bible-controls button:disabled {opacity:.35;cursor:default}
+    .bible-import {background:var(--primary-darker);border:1px solid var(--primary-lighter);padding:12px;border-radius:9px;display:flex;flex-direction:column;gap:7px}.bible-import input {font-size:12px}.bible-import span {font-size:12px;opacity:.7}.import-error {font-size:12px;color:#ffaaa8}.passage-result {padding:15px 20px;background:var(--primary-darker);border-radius:10px;border:1px solid var(--primary-lighter);line-height:1.65}.passage-result h3 {font-size:17px}.passage-result p {margin:12px 0}.passage-result strong {color:#b898e7;margin-right:6px}
+    .pw-slide-editor {display:flex;flex-direction:column;gap:12px;margin-top:15px}
     .pw-slide-heading {display:flex;justify-content:space-between;align-items:center;gap:10px}.pw-slide-heading small {opacity:.6}
     .pw-slide-layout {display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr);gap:12px}
     .pw-thumbnails {display:flex;flex-direction:column;gap:8px;max-height:380px;overflow:auto}
