@@ -2,8 +2,9 @@
     import { checkProWorshipBridge, DEFAULT_BRIDGE_URL } from "./bridge"
     import { formatScriptureReference, parseScriptureReference, suggestBibleBooks } from "./scriptureReference"
 
+    export let embedded = false
     type Tab = "scripture" | "ai" | "activity"
-    let expanded = false
+    let expanded = embedded
     let activeTab: Tab = "scripture"
     let scriptureInput = ""
     let translation = "KJV"
@@ -54,13 +55,13 @@
     }
 </script>
 
-<div class="pw-workspace">
+<div class="pw-workspace" class:embedded>
     {#if expanded}
         <section class="pw-panel" aria-label="ProWorshipAI workspace">
             <header class="pw-header">
                 <div class="pw-mark" aria-hidden="true">P</div>
                 <div class="pw-title"><strong>ProWorshipAI</strong><small>Presentation workspace</small></div>
-                <button class="pw-icon" type="button" aria-label="Close ProWorshipAI workspace" on:click={() => (expanded = false)}>✕</button>
+                {#if !embedded}<button class="pw-icon" type="button" aria-label="Close ProWorshipAI workspace" on:click={() => (expanded = false)}>✕</button>{/if}
             </header>
             <nav class="pw-tabs" aria-label="ProWorshipAI sections">
                 <button type="button" class:active={activeTab === "scripture"} on:click={() => (activeTab = "scripture")}>Scripture</button>
@@ -114,11 +115,11 @@
             </div>
         </section>
     {/if}
-    <button type="button" class="pw-launch" aria-expanded={expanded} on:click={() => (expanded = !expanded)}><span class="pw-launch-mark">P</span><span>ProWorshipAI</span><span class="pw-chevron">{expanded ? "×" : "⌃"}</span></button>
+    {#if !embedded}<button type="button" class="pw-launch" aria-expanded={expanded} on:click={() => (expanded = !expanded)}><span class="pw-launch-mark">P</span><span>ProWorshipAI</span><span class="pw-chevron">{expanded ? "×" : "⌃"}</span></button>{/if}
 </div>
 
 <style>
-    .pw-workspace {position:absolute;bottom:38px;right:14px;z-index:90;font-family:inherit;font-size:13px;color:#f5f0ff}
+    .pw-workspace.embedded {position:relative;bottom:auto;right:auto;z-index:1;min-height:0;width:100%;display:flex;flex-direction:column;flex:1;overflow:hidden}\n    .pw-workspace.embedded .pw-panel {width:auto;max-width:none;max-height:none;margin:0;border:0;border-radius:0;box-shadow:none;flex:1;min-height:0}\n    .pw-workspace.embedded .pw-body {min-height:0;flex:1}\n    .pw-workspace {position:absolute;bottom:38px;right:14px;z-index:90;font-family:inherit;font-size:13px;color:#f5f0ff}
     button,input,select {font:inherit}
     button {cursor:pointer}
     .pw-launch {display:flex;align-items:center;gap:10px;padding:8px 13px;border:1px solid #9672ce;border-radius:14px;color:#fff;background:linear-gradient(120deg,#5a3296,#32204f);box-shadow:0 8px 25px #0007;font-weight:700}
