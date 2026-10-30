@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { onMount } from "svelte"
     import { checkProWorshipBridge, DEFAULT_BRIDGE_URL } from "./bridge"
     import { formatScriptureReference, parseScriptureReference, suggestBibleBooks } from "./scriptureReference"
     import { searchBibleStories, STORY_CATEGORIES } from "./bibleStories"
@@ -15,6 +16,23 @@
     const translations = ["KJV", "NLT", "AMP", "MSG", "TPT", "CEB"]
     let history: string[] = []
     let saved: string[] = []
+    let preferencesLoaded = false
+    onMount(() => {
+        try {
+            const raw = localStorage.getItem("proworshipai.freeshow.scripture.preferences.v1")
+            if (raw) {
+                const data = JSON.parse(raw)
+                if (Array.isArray(data.saved)) saved = data.saved.filter((x: unknown) => typeof x === "string").slice(0, 20)
+                if (Array.isArray(data.history)) history = data.history.filter((x: unknown) => typeof x === "string").slice(0, 20)
+                if (translations.includes(data.translation)) translation = data.translation
+            }
+        } catch (error) { console.warn("ProWorshipAI preferences unavailable", error) }
+        preferencesLoaded = true
+    })
+    $: if (preferencesLoaded) {
+        try { localStorage.setItem("proworshipai.freeshow.scripture.preferences.v1", JSON.stringify({ saved, history, translation })) }
+        catch (error) { console.warn("Could not save ProWorshipAI preferences", error) }
+    }
     $: parsedScripture = parseScriptureReference(scriptureInput)
     $: suggestions = suggestBibleBooks(scriptureInput.split(/\d/)[0].trim())
     let checking = false
@@ -124,7 +142,7 @@
                     {#if history.length}
                         {#each history as reference}<button type="button" class="pw-history" on:click={() => useReference(reference)}>{reference}</button>{/each}
                     {:else}<p class="pw-info">No recent references in this session.</p>{/if}
-                    <p class="pw-footnote">Session-only lists; persistent libraries will be connected in a later batch.</p>
+                    <p class="pw-footnote">Saved references and translation choice persist locally. Your complete Bible library will be connected separately.</p>
                 {/if}
             </div>
         </section>
