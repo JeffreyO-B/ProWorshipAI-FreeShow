@@ -101,7 +101,7 @@
             <div class="unsaved" />
         {/if}
         <!-- logo -->
-        <h1 title="ProWorshipAI — FreeShow Edition" style="align-self: center;width: 100%;padding: 0px 8px;text-align: center;font-size: 1.2em;font-weight: 700;color: #b58ce9;white-space: nowrap;">ProWorshipAI</h1>
+        <div class="pw-brand" title="ProWorshipAI — FreeShow Edition"><span class="pw-name">ProWorshipAI</span><span class="pw-edition">FreeShow Edition</span></div>
         <!-- <div class="logo">
             <img style="height: 35px;" src="./import-logos/freeshow.webp" alt="FreeShow-logo" draggable={false} />
             <h1 style="color: var(--text);font-size: 1.7em;">FreeShow</h1>
@@ -159,7 +159,7 @@
 </div>
 
 <style>
-    .top {
+    .pw-brand { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; min-width: 0; padding: 0 3px; line-height: 1.05; overflow: hidden; }\n    .pw-name { color: #c19bf0; font-weight: 700; font-size: clamp(10px, 1.2vw, 15px); letter-spacing: -.04em; white-space: nowrap; }\n    .pw-edition { color: var(--text); opacity: .7; font-size: 9px; white-space: nowrap; }\n    .top {
         position: relative;
         display: flex;
         justify-content: space-between;
