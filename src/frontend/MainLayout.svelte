@@ -41,6 +41,7 @@
         <Resizeable id="leftPanel">
             <div class="left">
                 {#if page === "show"}
+                    <AIConnectionPanel embedded />
                     {#key $activeProfile}
                         <Projects />
                     {/key}
@@ -126,10 +127,6 @@
 
     {#if $ai.enabled}
         <AiFloating />
-    {/if}
-
-    {#if !$focusMode}
-        <AIConnectionPanel />
     {/if}
 
     <Tipbar />
