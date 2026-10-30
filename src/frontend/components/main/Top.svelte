@@ -101,7 +101,7 @@
             <div class="unsaved" />
         {/if}
         <!-- logo -->
-        <div class="pw-brand" title="ProWorshipAI — FreeShow Edition"><span class="pw-name">ProWorshipAI</span><span class="pw-edition">FreeShow Edition</span></div>
+        <div class="pw-brand" title="ProWorshipAI — FreeShow Edition"><span class="pw-name">ProWorshipAI</span></div>
         <!-- <div class="logo">
             <img style="height: 35px;" src="./import-logos/freeshow.webp" alt="FreeShow-logo" draggable={false} />
             <h1 style="color: var(--text);font-size: 1.7em;">FreeShow</h1>
@@ -159,7 +159,9 @@
 </div>
 
 <style>
-    .pw-brand { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; min-width: 0; padding: 0 3px; line-height: 1.05; overflow: hidden; }\n    .pw-name { color: #c19bf0; font-weight: 700; font-size: clamp(10px, 1.2vw, 15px); letter-spacing: -.04em; white-space: nowrap; }\n    .pw-edition { color: var(--text); opacity: .7; font-size: 9px; white-space: nowrap; }\n    .top {
+    .pw-brand {display:flex;align-items:center;justify-content:center;width:100%;min-width:0;overflow:hidden;padding:0 4px;}
+    .pw-name {font-size:clamp(10px,1.05vw,13px);font-weight:750;letter-spacing:-.035em;color:#c7a5f5;white-space:nowrap;}
+    .top {
         position: relative;
         display: flex;
         justify-content: space-between;
