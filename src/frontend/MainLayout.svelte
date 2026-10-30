@@ -1,5 +1,6 @@
 <script lang="ts">
     import AiFloating from "./ai/components/floating/AiFloating.svelte"
+    import AIConnectionPanel from "./proworship/AIConnectionPanel.svelte"
     import { customActionActivation } from "./components/actions/actions"
     import DrawTabs from "./components/draw/DrawTabs.svelte"
     import Navigation from "./components/edit/Navigation.svelte"
@@ -125,6 +126,10 @@
 
     {#if $ai.enabled}
         <AiFloating />
+    {/if}
+
+    {#if !$focusMode}
+        <AIConnectionPanel />
     {/if}
 
     <Tipbar />
