@@ -151,17 +151,20 @@
 </div>
 
 <style>
-    .pw-workspace.embedded {position:relative;bottom:auto;right:auto;z-index:1;min-height:0;width:100%;display:flex;flex-direction:column;flex:1;overflow:hidden}\n    .pw-workspace.embedded .pw-panel {width:auto;max-width:none;max-height:none;margin:0;border:0;border-radius:0;box-shadow:none;flex:1;min-height:0}\n    .pw-workspace.embedded .pw-body {min-height:0;flex:1}\n    .pw-workspace {position:absolute;bottom:38px;right:14px;z-index:90;font-family:inherit;font-size:13px;color:#f5f0ff}
+    .pw-workspace.embedded {position:relative;bottom:auto;right:auto;z-index:1;min-height:0;width:100%;display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .pw-workspace.embedded .pw-panel {width:auto;max-width:none;max-height:none;margin:0;border:0;border-radius:0;box-shadow:none;flex:1;min-height:0}
+    .pw-workspace.embedded .pw-body {min-height:0;flex:1}
+    .pw-workspace {position:absolute;bottom:38px;right:14px;z-index:60;font-family:inherit;font-size:13px;color:#f5f0ff}
     button,input,select {font:inherit}
     button {cursor:pointer}
     .pw-launch {display:flex;align-items:center;gap:10px;padding:8px 13px;border:1px solid #9672ce;border-radius:14px;color:#fff;background:linear-gradient(120deg,#5a3296,#32204f);box-shadow:0 8px 25px #0007;font-weight:700}
     .pw-launch-mark,.pw-mark {display:grid;place-items:center;background:linear-gradient(140deg,#a879ed,#6941a0);color:white;font-weight:800;border-radius:9px}
     .pw-launch-mark {width:24px;height:24px}.pw-chevron {margin-left:10px;opacity:.8}
-    .pw-panel {width:min(520px,calc(100vw - 32px));max-height:min(640px,calc(100vh - 120px));display:flex;flex-direction:column;margin-bottom:10px;background:#191725;border:1px solid #4d4167;border-radius:18px;overflow:hidden;box-shadow:0 20px 65px #000a}
+    .pw-panel {width:min(480px,calc(100vw - 32px));max-height:min(640px,calc(100vh - 120px));display:flex;flex-direction:column;margin-bottom:10px;background:#191725;border:1px solid #4d4167;border-radius:18px;overflow:hidden;box-shadow:0 20px 65px #000a}
     .pw-header {display:flex;align-items:center;gap:12px;padding:16px;background:linear-gradient(110deg,#32214e,#211b31)}
     .pw-mark {height:36px;width:36px;font-size:20px}.pw-title {display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.pw-title strong {font-size:16px}.pw-title small {color:#bcaed5;font-size:11px}
     .pw-icon {border:0;background:#ffffff13;color:white;border-radius:9px;padding:7px 11px}
-    .pw-tabs {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:8px 12px;background:#201b2d}.pw-tabs button {flex:1;border:0;background:transparent;color:#bfb2d1;border-radius:9px;padding:10px 5px}.pw-tabs button.active {color:white;background:#674495;font-weight:700}
+    .pw-tabs {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:8px 12px;background:#201b2d}.pw-tabs button {min-width:0;white-space:nowrap;font-size:12px;border:0;background:transparent;color:#bfb2d1;border-radius:9px;padding:10px 5px}.pw-tabs button.active {color:white;background:#674495;font-weight:700}
     .pw-body {padding:18px;overflow-y:auto;min-height:230px}.pw-section-label {font-size:10px;color:#ae91da;font-weight:800;letter-spacing:.12em;margin-bottom:13px}.pw-space {margin-top:20px}
     label {display:block;color:#dcd2ea;font-weight:600;font-size:12px;margin-bottom:7px}
     input,select {box-sizing:border-box;color:#fff;background:#2b253b;border:1px solid #514465;border-radius:10px;padding:11px;outline:none}
@@ -172,5 +175,6 @@
     .pw-actions {display:flex;gap:7px;flex-wrap:wrap}.pw-actions button,.pw-body>.primary {border:1px solid #615078;border-radius:9px;padding:10px;background:#332a43;color:white}.pw-actions .primary,.pw-body>.primary {background:#754ab2;border-color:#9469d1;font-weight:700}.pw-actions button:disabled,.pw-body button:disabled {opacity:.4;cursor:default}
     .pw-footnote {font-size:11px;line-height:1.5;color:#a99bbf;margin-top:17px}.pw-info {color:#c9bdd9;line-height:1.6;overflow-wrap:anywhere}
     .pw-dot {height:9px;width:9px;background:#d29e70;border-radius:50%}.pw-dot.online {background:#66d7a3}.pw-status {display:flex;align-items:center;gap:12px;background:#282039;border-radius:11px;padding:13px;margin-bottom:15px}.pw-status div {display:flex;flex-direction:column;gap:3px}.pw-status small {font-size:11px;color:#b8a7d1}
-    .pw-history strong,.pw-history small {display:block;} .pw-history small {color:#ae98ca;margin-top:4px;font-size:11px;}\n    .pw-history {display:block;width:100%;text-align:left;color:#e7dafa;background:#2a2438;border:1px solid #453658;border-radius:9px;margin:7px 0;padding:10px}
+    .pw-history strong,.pw-history small {display:block;} .pw-history small {color:#ae98ca;margin-top:4px;font-size:11px;}
+    .pw-history {display:block;width:100%;text-align:left;color:#e7dafa;background:#2a2438;border:1px solid #453658;border-radius:9px;margin:7px 0;padding:10px}
 </style>
