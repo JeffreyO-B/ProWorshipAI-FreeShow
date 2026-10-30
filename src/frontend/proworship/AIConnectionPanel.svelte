@@ -1,15 +1,41 @@
 <script lang="ts">
     import { checkProWorshipBridge, DEFAULT_BRIDGE_URL } from "./bridge"
-    import { formatScriptureReference, parseScriptureReference } from "./scriptureReference"
+    import { formatScriptureReference, parseScriptureReference, suggestBibleBooks } from "./scriptureReference"
 
-    let scriptureInput = ""
-    $: parsedScripture = parseScriptureReference(scriptureInput)
+    type Tab = "scripture" | "ai" | "activity"
     let expanded = false
+    let activeTab: Tab = "scripture"
+    let scriptureInput = ""
+    let translation = "KJV"
+    const translations = ["KJV", "NLT", "AMP", "MSG", "TPT", "CEB"]
+    let history: string[] = []
+    let saved: string[] = []
+    $: parsedScripture = parseScriptureReference(scriptureInput)
+    $: suggestions = suggestBibleBooks(scriptureInput.split(/\d/)[0].trim())
     let checking = false
     let connected: boolean | null = null
     let ollamaAvailable: boolean | null = null
-    let details = "Select Test connection to check the optional local AI bridge."
+    let details = "AI backend has not been checked."
 
+    function saveReference() {
+        if (!parsedScripture) return
+        const reference = formatScriptureReference(parsedScripture)
+        history = [reference, ...history.filter((x) => x !== reference)].slice(0, 20)
+    }
+    function toggleFavourite() {
+        if (!parsedScripture) return
+        const reference = formatScriptureReference(parsedScripture)
+        saved = saved.includes(reference) ? saved.filter((x) => x !== reference) : [reference, ...saved].slice(0, 20)
+    }
+    function useReference(reference: string) {
+        scriptureInput = reference
+        activeTab = "scripture"
+    }
+    async function copyReference() {
+        if (!parsedScripture) return
+        await navigator.clipboard.writeText(formatScriptureReference(parsedScripture) + " (" + translation + ")")
+        saveReference()
+    }
     async function testConnection() {
         if (checking) return
         checking = true
@@ -28,38 +54,90 @@
     }
 </script>
 
-<div class="pw-wrapper">
-    <button type="button" class="pw-toggle" aria-expanded={expanded} on:click={() => (expanded = !expanded)}>
-        <span class="pw-dot" class:online={connected === true} />
-        ProWorshipAI {expanded ? "▲" : "▼"}
-    </button>
+<div class="pw-workspace">
     {#if expanded}
-        <section class="pw-panel" aria-label="ProWorshipAI AI bridge">
-            <div class="pw-heading">ProWorshipAI — FreeShow Edition</div>
-            <p>AI bridge: {connected === null ? "Not checked" : connected ? "Connected" : "Offline"}</p>
-            <p>Ollama: {ollamaAvailable === null ? "Unknown" : ollamaAvailable ? "Available" : "Unavailable"}</p>
-            <p class="pw-message">{details}</p>
-            <p class="pw-endpoint">Local endpoint: {DEFAULT_BRIDGE_URL}</p>
-            <button type="button" class="pw-test" on:click={testConnection} disabled={checking}>
-                {checking ? "Checking..." : "Test connection"}
-            </button>
-            <div class="pw-scripture"><label for="pw-scripture-ref">Quick Scripture reference</label><input id="pw-scripture-ref" type="text" bind:value={scriptureInput} placeholder="John 3:16-18" autocomplete="off" /><p aria-live="polite">{!scriptureInput.trim() ? "Enter a Bible reference." : parsedScripture ? "Recognised: " + formatScriptureReference(parsedScripture) : "Reference not recognised."}</p></div>
-            <p class="pw-note">Reference entry only; Bible text and live projection will be connected after library integration.</p>
+        <section class="pw-panel" aria-label="ProWorshipAI workspace">
+            <header class="pw-header">
+                <div class="pw-mark" aria-hidden="true">P</div>
+                <div class="pw-title"><strong>ProWorshipAI</strong><small>Presentation workspace</small></div>
+                <button class="pw-icon" type="button" aria-label="Close ProWorshipAI workspace" on:click={() => (expanded = false)}>✕</button>
+            </header>
+            <nav class="pw-tabs" aria-label="ProWorshipAI sections">
+                <button type="button" class:active={activeTab === "scripture"} on:click={() => (activeTab = "scripture")}>Scripture</button>
+                <button type="button" class:active={activeTab === "ai"} on:click={() => (activeTab = "ai")}>AI Engine</button>
+                <button type="button" class:active={activeTab === "activity"} on:click={() => (activeTab = "activity")}>Library</button>
+            </nav>
+            <div class="pw-body">
+                {#if activeTab === "scripture"}
+                    <div class="pw-section-label">QUICK BIBLE</div>
+                    <label for="pw-ref">Scripture reference</label>
+                    <input id="pw-ref" bind:value={scriptureInput} on:keydown={(e) => { if (e.key === "Enter") saveReference() }} placeholder="John 3:16-18" autocomplete="off" />
+                    {#if suggestions.length && !parsedScripture}
+                        <div class="pw-suggest">
+                            {#each suggestions as book}
+                                <button type="button" on:click={() => (scriptureInput = book + " ")}>{book}</button>
+                            {/each}
+                        </div>
+                    {/if}
+                    <div class="pw-row"><label for="pw-translation">Translation</label><select id="pw-translation" bind:value={translation}>{#each translations as option}<option value={option}>{option}</option>{/each}</select></div>
+                    <div class="pw-result" aria-live="polite">
+                        {#if parsedScripture}
+                            <strong>{formatScriptureReference(parsedScripture)}</strong><small>Reference recognised · {translation}</small>
+                        {:else}
+                            <strong>{scriptureInput.trim() ? "Reference not recognised" : "Find a Bible passage"}</strong><small>Enter a book, chapter or verse range</small>
+                        {/if}
+                    </div>
+                    <div class="pw-actions">
+                        <button type="button" class="primary" disabled={!parsedScripture} on:click={saveReference}>Add to recent</button>
+                        <button type="button" disabled={!parsedScripture} on:click={toggleFavourite}>{parsedScripture && saved.includes(formatScriptureReference(parsedScripture)) ? "★ Saved" : "☆ Save"}</button>
+                        <button type="button" disabled={!parsedScripture} on:click={copyReference}>Copy</button>
+                    </div>
+                    <p class="pw-footnote">Reference management is active. Translation text, Preview and Live will become available when the original libraries and FreeShow output adapter are connected.</p>
+                {:else if activeTab === "ai"}
+                    <div class="pw-section-label">LOCAL AI ENGINE</div>
+                    <div class="pw-status"><span class:online={connected === true} class="pw-dot"></span><div><strong>{connected === null ? "Not checked" : connected ? "Connected" : "Offline"}</strong><small>{DEFAULT_BRIDGE_URL}</small></div></div>
+                    <p class="pw-info">{details}</p>
+                    <p class="pw-info">Ollama: {ollamaAvailable === null ? "Unknown" : ollamaAvailable ? "Available" : "Unavailable"}</p>
+                    <button type="button" class="primary" disabled={checking} on:click={testConnection}>{checking ? "Checking..." : "Test local AI connection"}</button>
+                    <p class="pw-footnote">Live transcription and contextual Top 3 suggestions are awaiting backend integration.</p>
+                {:else}
+                    <div class="pw-section-label">SAVED REFERENCES</div>
+                    {#if saved.length}
+                        {#each saved as reference}<button type="button" class="pw-history" on:click={() => useReference(reference)}>★ {reference}</button>{/each}
+                    {:else}<p class="pw-info">No favourites saved in this session.</p>{/if}
+                    <div class="pw-section-label pw-space">RECENT REFERENCES</div>
+                    {#if history.length}
+                        {#each history as reference}<button type="button" class="pw-history" on:click={() => useReference(reference)}>{reference}</button>{/each}
+                    {:else}<p class="pw-info">No recent references in this session.</p>{/if}
+                    <p class="pw-footnote">Session-only lists; persistent libraries will be connected in a later batch.</p>
+                {/if}
+            </div>
         </section>
     {/if}
+    <button type="button" class="pw-launch" aria-expanded={expanded} on:click={() => (expanded = !expanded)}><span class="pw-launch-mark">P</span><span>ProWorshipAI</span><span class="pw-chevron">{expanded ? "×" : "⌃"}</span></button>
 </div>
 
 <style>
-    .pw-wrapper { position: absolute; bottom: 34px; right: 12px; z-index: 90; font-size: 13px; }
-    .pw-toggle { display: flex; align-items: center; gap: 7px; background: #543580; color: white; border: 1px solid #9b80c5; border-radius: 7px; padding: 7px 11px; cursor: pointer; }
-    .pw-dot { width: 8px; height: 8px; border-radius: 50%; background: #b4a2c9; }
-    .pw-dot.online { background: #5fe6aa; }
-    .pw-panel { width: 300px; max-width: calc(100vw - 40px); margin-bottom: 8px; background: #241b32; color: #fff; padding: 15px; border: 1px solid #9473ba; border-radius: 9px; box-shadow: 0 8px 26px #0008; }
-    .pw-heading { font-weight: 700; font-size: 14px; margin-bottom: 10px; }
-    .pw-panel p { margin: 6px 0; }
-    .pw-message { overflow-wrap: anywhere; color: #ddd0ee; }
-    .pw-endpoint { font-size: 11px; opacity: .75; }
-    .pw-test { margin-top: 8px; padding: 8px 10px; border-radius: 6px; background: #7650a4; color: white; border: 1px solid #ad92d5; cursor: pointer; }
-    .pw-test:disabled { opacity: .6; cursor: progress; }
-    .pw-scripture { margin-top: 14px; border-top: 1px solid #70538a; padding-top: 10px; }\n    .pw-scripture label { display: block; margin-bottom: 5px; }\n    .pw-scripture input { box-sizing: border-box; width: 100%; background: #362747; border: 1px solid #9677b9; border-radius: 5px; color: white; padding: 8px; }\n    .pw-scripture p { color: #d8c7e9; font-size: 11px; }\n    .pw-note { font-size: 11px; opacity: .8; margin-top: 12px !important; }
+    .pw-workspace {position:absolute;bottom:38px;right:14px;z-index:90;font-family:inherit;font-size:13px;color:#f5f0ff}
+    button,input,select {font:inherit}
+    button {cursor:pointer}
+    .pw-launch {display:flex;align-items:center;gap:10px;padding:8px 13px;border:1px solid #9672ce;border-radius:14px;color:#fff;background:linear-gradient(120deg,#5a3296,#32204f);box-shadow:0 8px 25px #0007;font-weight:700}
+    .pw-launch-mark,.pw-mark {display:grid;place-items:center;background:linear-gradient(140deg,#a879ed,#6941a0);color:white;font-weight:800;border-radius:9px}
+    .pw-launch-mark {width:24px;height:24px}.pw-chevron {margin-left:10px;opacity:.8}
+    .pw-panel {width:min(380px,calc(100vw - 32px));max-height:min(620px,calc(100vh - 115px));display:flex;flex-direction:column;margin-bottom:10px;background:#191725;border:1px solid #4d4167;border-radius:18px;overflow:hidden;box-shadow:0 20px 65px #000a}
+    .pw-header {display:flex;align-items:center;gap:12px;padding:16px;background:linear-gradient(110deg,#32214e,#211b31)}
+    .pw-mark {height:36px;width:36px;font-size:20px}.pw-title {display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.pw-title strong {font-size:16px}.pw-title small {color:#bcaed5;font-size:11px}
+    .pw-icon {border:0;background:#ffffff13;color:white;border-radius:9px;padding:7px 11px}
+    .pw-tabs {display:flex;gap:4px;padding:8px 12px;background:#201b2d}.pw-tabs button {flex:1;border:0;background:transparent;color:#bfb2d1;border-radius:9px;padding:10px 5px}.pw-tabs button.active {color:white;background:#674495;font-weight:700}
+    .pw-body {padding:18px;overflow-y:auto;min-height:230px}.pw-section-label {font-size:10px;color:#ae91da;font-weight:800;letter-spacing:.12em;margin-bottom:13px}.pw-space {margin-top:20px}
+    label {display:block;color:#dcd2ea;font-weight:600;font-size:12px;margin-bottom:7px}
+    input,select {box-sizing:border-box;color:#fff;background:#2b253b;border:1px solid #514465;border-radius:10px;padding:11px;outline:none}
+    input {width:100%;margin-bottom:12px}input:focus,select:focus {border-color:#b18ae5;box-shadow:0 0 0 2px #8c5ccb35}
+    .pw-suggest {display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.pw-suggest button {background:#342745;color:#e4d4ff;border:1px solid #5c4477;border-radius:8px;padding:5px 9px}
+    .pw-row {display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.pw-row label {margin:0}.pw-row select {width:138px}
+    .pw-result {display:flex;flex-direction:column;gap:6px;padding:15px;margin-bottom:15px;border:1px solid #4b3a6a;background:#282039;border-radius:12px}.pw-result strong {font-size:17px}.pw-result small {color:#b8a7d1}
+    .pw-actions {display:flex;gap:7px;flex-wrap:wrap}.pw-actions button,.pw-body>.primary {border:1px solid #615078;border-radius:9px;padding:10px;background:#332a43;color:white}.pw-actions .primary,.pw-body>.primary {background:#754ab2;border-color:#9469d1;font-weight:700}.pw-actions button:disabled,.pw-body button:disabled {opacity:.4;cursor:default}
+    .pw-footnote {font-size:11px;line-height:1.5;color:#a99bbf;margin-top:17px}.pw-info {color:#c9bdd9;line-height:1.6;overflow-wrap:anywhere}
+    .pw-dot {height:9px;width:9px;background:#d29e70;border-radius:50%}.pw-dot.online {background:#66d7a3}.pw-status {display:flex;align-items:center;gap:12px;background:#282039;border-radius:11px;padding:13px;margin-bottom:15px}.pw-status div {display:flex;flex-direction:column;gap:3px}.pw-status small {font-size:11px;color:#b8a7d1}
+    .pw-history {display:block;width:100%;text-align:left;color:#e7dafa;background:#2a2438;border:1px solid #453658;border-radius:9px;margin:7px 0;padding:10px}
 </style>
