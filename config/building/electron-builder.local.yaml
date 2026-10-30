@@ -1,5 +1,10 @@
 extends: config/building/electron-builder.yaml
 
+# Separate identity and installation path for ProWorshipAI — FreeShow Edition.
+appId: uk.proworshipai.freeshowedition
+productName: ProWorshipAI FreeShow Edition
+artifactName: ProWorshipAI-FreeShow-Edition-${version}-${arch}.${ext}
+
 win:
     azureSignOptions: null
 
