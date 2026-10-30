@@ -23,6 +23,18 @@
     $: suggestions = suggestBibleBooks(reference.split(/\d/)[0])
     $: stories = searchBibleStories(storyQuery, category)
 
+    function changeChapter(amount: number) {
+        if (!selection) return
+        const chapter = selection.chapter + amount
+        if (chapter < 1 || chapter > 150) return
+        reference = selection.book + " " + chapter
+        verseLimit = 12
+    }
+    async function copyPassage() {
+        if (!selection || !loadedBible || !matchingVerses.length) return
+        const lines = matchingVerses.map((verse) => verse.chapter + ":" + verse.verse + " " + verse.text)
+        await navigator.clipboard.writeText(formatScriptureReference(selection) + " (" + loadedBible.translation + ")\\n" + lines.join("\\n"))
+    }
     async function importBible(event: Event) {
         const files = (event.currentTarget as HTMLInputElement).files
         if (!files?.length) return
@@ -71,8 +83,9 @@
                 {#each ["KJV","NLT","AMP","MSG","TPT","CEB"] as value}<option value={value}>{value}</option>{/each}
             </select>
             <div class="reference-result">{selection ? formatScriptureReference(selection) : "Enter a book, chapter or verse range"}</div>
+            {#if selection}<div class="bible-controls"><button type="button" on:click={() => changeChapter(-1)} disabled={selection.chapter <= 1}>← Previous chapter</button><button type="button" on:click={() => changeChapter(1)}>Next chapter →</button></div>{/if}
             <div class="bible-import"><label for="pw-bible-file">Import Bible JSON for this session</label><input id="pw-bible-file" bind:this={fileInput} type="file" accept=".json,application/json" on:change={importBible} /><span>{loadedBible ? loadedBible.translation + " · " + loadedBible.verses.length + " verses loaded" : "No translation text loaded"}</span>{#if importError}<p class="import-error" role="alert">{importError}</p>{/if}</div>
-            {#if loadedBible && selection}<div class="passage-result"><h3>{formatScriptureReference(selection)} · {loadedBible.translation}</h3>{#if matchingVerses.length}{#each matchingVerses.slice(0,verseLimit) as verse (verse.book + verse.chapter + ":" + verse.verse)}<p><strong>{verse.chapter}:{verse.verse}</strong> {verse.text}</p>{/each}{#if matchingVerses.length > verseLimit}<button type="button" class="accent" on:click={() => (verseLimit += 12)}>Show more verses</button>{/if}{:else}<p>No matching verses in the imported translation.</p>{/if}</div>{/if}
+            {#if loadedBible && selection}<div class="passage-result"><h3>{formatScriptureReference(selection)} · {loadedBible.translation}</h3><button type="button" class="accent" disabled={!matchingVerses.length} on:click={copyPassage}>Copy passage</button>{#if matchingVerses.length}{#each matchingVerses.slice(0,verseLimit) as verse (verse.book + verse.chapter + ":" + verse.verse)}<p><strong>{verse.chapter}:{verse.verse}</strong> {verse.text}</p>{/each}{#if matchingVerses.length > verseLimit}<button type="button" class="accent" on:click={() => (verseLimit += 12)}>Show more verses</button>{/if}{:else}<p>No matching verses in the imported translation.</p>{/if}</div>{/if}
             <p class="supporting">Verse text is now available from a locally imported JSON translation. Projection via FreeShow Preview/Live is not yet connected. Import is session-only.</p>
         {:else}
             <label for="pw-story-search">Find a story</label>
@@ -106,5 +119,5 @@
     .status-box {display:flex;flex-direction:column;gap:8px}.status-box span {font-size:12px;opacity:.8;line-height:1.5}
     .supporting {font-size:11px;line-height:1.6;opacity:.7}
     .story-list {display:flex;flex-direction:column;gap:5px}.story-list button {padding:9px;text-align:left;background:var(--primary-darker);color:var(--text);border:1px solid var(--primary-lighter);border-radius:7px;cursor:pointer}.story-list small {display:block;opacity:.65;margin-top:3px}
-    .bible-import {background:var(--primary-darker);border:1px solid var(--primary-lighter);padding:12px;border-radius:9px;display:flex;flex-direction:column;gap:7px}.bible-import input {font-size:12px}.bible-import span {font-size:12px;opacity:.7}.import-error {font-size:12px;color:#ffaaa8}.passage-result {padding:15px 20px;background:var(--primary-darker);border-radius:10px;border:1px solid var(--primary-lighter);line-height:1.65}.passage-result h3 {font-size:17px}.passage-result p {margin:12px 0}.passage-result strong {color:#b898e7;margin-right:6px}\n    .accent {padding:10px;color:white;background:#654398;border:none;border-radius:7px;cursor:pointer}
+    .bible-controls {display:flex;gap:8px;flex-wrap:wrap}.bible-controls button {border:1px solid var(--primary-lighter);background:var(--primary-darker);color:var(--text);padding:8px;border-radius:7px;cursor:pointer}.bible-controls button:disabled {opacity:.35;cursor:default}\n    .bible-import {background:var(--primary-darker);border:1px solid var(--primary-lighter);padding:12px;border-radius:9px;display:flex;flex-direction:column;gap:7px}.bible-import input {font-size:12px}.bible-import span {font-size:12px;opacity:.7}.import-error {font-size:12px;color:#ffaaa8}.passage-result {padding:15px 20px;background:var(--primary-darker);border-radius:10px;border:1px solid var(--primary-lighter);line-height:1.65}.passage-result h3 {font-size:17px}.passage-result p {margin:12px 0}.passage-result strong {color:#b898e7;margin-right:6px}\n    .accent {padding:10px;color:white;background:#654398;border:none;border-radius:7px;cursor:pointer}
 </style>
