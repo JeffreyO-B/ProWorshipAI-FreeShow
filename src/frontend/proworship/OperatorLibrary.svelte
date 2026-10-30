@@ -3,7 +3,7 @@
     import { formatScriptureReference, parseScriptureReference, suggestBibleBooks } from "./scriptureReference"
     import { searchBibleStories, STORY_CATEGORIES } from "./bibleStories"
 
-    export type OperatorSection = "service" | "bible" | "songs" | "media" | "ai"
+    type OperatorSection = "service" | "bible" | "songs" | "media" | "ai"
     export let section: OperatorSection = "service"
 
     let bibleView: "quick" | "stories" = "quick"
