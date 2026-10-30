@@ -17,3 +17,9 @@ export const BIBLE_STORIES: BibleStory[] = [
     { id:"pentecost",title:"The Holy Spirit at Pentecost",category:"Spirit",reference:"Acts 2" },
     { id:"paul",title:"Paul's conversion",category:"Encounters",reference:"Acts 9:1-19" }
 ]
+
+export const STORY_CATEGORIES = ["All", ...Array.from(new Set(BIBLE_STORIES.map((story) => story.category))).sort()]
+export function searchBibleStories(query: string, category = "All"): BibleStory[] {
+    const q = query.trim().toLowerCase()
+    return BIBLE_STORIES.filter((story) => (category === "All" || story.category === category) && (!q || [story.title, story.reference, story.category].some((v) => v.toLowerCase().includes(q))))
+}
