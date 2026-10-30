@@ -1,6 +1,7 @@
 <script lang="ts">
     import { checkProWorshipBridge } from "./bridge"
     import { findPassage, parseBibleLibrary, type BibleLibrary } from "./bibleLibrary"
+    import { makeScriptureSlides } from "./scriptureSlides"
     import { formatScriptureReference, parseScriptureReference, suggestBibleBooks } from "./scriptureReference"
     import { searchBibleStories, STORY_CATEGORIES } from "./bibleStories"
 
@@ -13,6 +14,9 @@
     let verseLimit = 12
     let fileInput: HTMLInputElement
     $: matchingVerses = loadedBible && selection ? findPassage(loadedBible, selection) : []
+    $: scriptureSlides = makeScriptureSlides(matchingVerses)
+    let selectedSlide = 0
+    $: if (selectedSlide >= scriptureSlides.length) selectedSlide = Math.max(0, scriptureSlides.length - 1)
     let reference = ""
     let translation = "KJV"
     let storyQuery = ""
@@ -86,7 +90,28 @@
             {#if selection}<div class="bible-controls"><button type="button" on:click={() => changeChapter(-1)} disabled={selection.chapter <= 1}>← Previous chapter</button><button type="button" on:click={() => changeChapter(1)}>Next chapter →</button></div>{/if}
             <div class="bible-import"><label for="pw-bible-file">Import Bible JSON for this session</label><input id="pw-bible-file" bind:this={fileInput} type="file" accept=".json,application/json" on:change={importBible} /><span>{loadedBible ? loadedBible.translation + " · " + loadedBible.verses.length + " verses loaded" : "No translation text loaded"}</span>{#if importError}<p class="import-error" role="alert">{importError}</p>{/if}</div>
             {#if loadedBible && selection}<div class="passage-result"><h3>{formatScriptureReference(selection)} · {loadedBible.translation}</h3><button type="button" class="accent" disabled={!matchingVerses.length} on:click={copyPassage}>Copy passage</button>{#if matchingVerses.length}{#each matchingVerses.slice(0,verseLimit) as verse (verse.book + verse.chapter + ":" + verse.verse)}<p><strong>{verse.chapter}:{verse.verse}</strong> {verse.text}</p>{/each}{#if matchingVerses.length > verseLimit}<button type="button" class="accent" on:click={() => (verseLimit += 12)}>Show more verses</button>{/if}{:else}<p>No matching verses in the imported translation.</p>{/if}</div>{/if}
-            <p class="supporting">Verse text is now available from a locally imported JSON translation. Projection via FreeShow Preview/Live is not yet connected. Import is session-only.</p>
+            {#if loadedBible && scriptureSlides.length}
+                <section class="pw-slide-editor" aria-label="Scripture slide preparation">
+                    <div class="pw-slide-heading"><strong>Slide preparation</strong><small>{scriptureSlides.length} slides · {loadedBible.translation}</small></div>
+                    <div class="pw-slide-layout">
+                        <div class="pw-thumbnails">
+                            {#each scriptureSlides as slide, i (slide.id)}
+                                <button type="button" class:chosen={selectedSlide === i} on:click={() => (selectedSlide = i)}>
+                                    <small>SLIDE {i+1}</small><span>{slide.text.slice(0,90)}{slide.text.length > 90 ? "…" : ""}</span>
+                                </button>
+                            {/each}
+                        </div>
+                        <div class="pw-slide-preview" aria-label="Selected scripture slide">
+                            <small class="pw-slide-translation">{loadedBible.translation}</small>
+                            <div class="pw-slide-text">{scriptureSlides[selectedSlide]?.text || ""}</div>
+                            <small class="pw-slide-reference">{selection ? formatScriptureReference(selection) : ""}</small>
+                        </div>
+                    </div>
+                    <div class="bible-controls"><button type="button" on:click={() => (selectedSlide = Math.max(0, selectedSlide - 1))} disabled={selectedSlide === 0}>← Previous slide</button><button type="button" on:click={() => (selectedSlide = Math.min(scriptureSlides.length-1, selectedSlide+1))} disabled={selectedSlide >= scriptureSlides.length - 1}>Next slide →</button></div>
+                    <p class="supporting">This is an operator-side slide preview. It is not yet a FreeShow Preview/Live output and cannot be projected from this control.</p>
+                </section>
+            {/if}
+            <p class="supporting">Verse text is available from a locally imported JSON translation. Import is session-only.</p>
         {:else}
             <label for="pw-story-search">Find a story</label>
             <input id="pw-story-search" bind:value={storyQuery} placeholder="Daniel, faith, miracles..." />
@@ -119,5 +144,17 @@
     .status-box {display:flex;flex-direction:column;gap:8px}.status-box span {font-size:12px;opacity:.8;line-height:1.5}
     .supporting {font-size:11px;line-height:1.6;opacity:.7}
     .story-list {display:flex;flex-direction:column;gap:5px}.story-list button {padding:9px;text-align:left;background:var(--primary-darker);color:var(--text);border:1px solid var(--primary-lighter);border-radius:7px;cursor:pointer}.story-list small {display:block;opacity:.65;margin-top:3px}
-    .bible-controls {display:flex;gap:8px;flex-wrap:wrap}.bible-controls button {border:1px solid var(--primary-lighter);background:var(--primary-darker);color:var(--text);padding:8px;border-radius:7px;cursor:pointer}.bible-controls button:disabled {opacity:.35;cursor:default}\n    .bible-import {background:var(--primary-darker);border:1px solid var(--primary-lighter);padding:12px;border-radius:9px;display:flex;flex-direction:column;gap:7px}.bible-import input {font-size:12px}.bible-import span {font-size:12px;opacity:.7}.import-error {font-size:12px;color:#ffaaa8}.passage-result {padding:15px 20px;background:var(--primary-darker);border-radius:10px;border:1px solid var(--primary-lighter);line-height:1.65}.passage-result h3 {font-size:17px}.passage-result p {margin:12px 0}.passage-result strong {color:#b898e7;margin-right:6px}\n    .accent {padding:10px;color:white;background:#654398;border:none;border-radius:7px;cursor:pointer}
+    .bible-controls {display:flex;gap:8px;flex-wrap:wrap}.bible-controls button {border:1px solid var(--primary-lighter);background:var(--primary-darker);color:var(--text);padding:8px;border-radius:7px;cursor:pointer}.bible-controls button:disabled {opacity:.35;cursor:default}\n    .bible-import {background:var(--primary-darker);border:1px solid var(--primary-lighter);padding:12px;border-radius:9px;display:flex;flex-direction:column;gap:7px}.bible-import input {font-size:12px}.bible-import span {font-size:12px;opacity:.7}.import-error {font-size:12px;color:#ffaaa8}.passage-result {padding:15px 20px;background:var(--primary-darker);border-radius:10px;border:1px solid var(--primary-lighter);line-height:1.65}.passage-result h3 {font-size:17px}.passage-result p {margin:12px 0}.passage-result strong {color:#b898e7;margin-right:6px}\n    .pw-slide-editor {display:flex;flex-direction:column;gap:12px;margin-top:15px}
+    .pw-slide-heading {display:flex;justify-content:space-between;align-items:center;gap:10px}.pw-slide-heading small {opacity:.6}
+    .pw-slide-layout {display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr);gap:12px}
+    .pw-thumbnails {display:flex;flex-direction:column;gap:8px;max-height:380px;overflow:auto}
+    .pw-thumbnails button {display:flex;flex-direction:column;gap:8px;text-align:left;color:var(--text);background:var(--primary-darker);border:1px solid var(--primary-lighter);border-radius:8px;padding:9px;cursor:pointer}
+    .pw-thumbnails button.chosen {border-color:#b898e7;box-shadow:inset 0 0 0 1px #b898e7}
+    .pw-thumbnails span {font-size:11px;line-height:1.4;overflow-wrap:anywhere}.pw-thumbnails small {font-size:10px;opacity:.65}
+    .pw-slide-preview {position:relative;display:flex;min-height:245px;aspect-ratio:16/9;flex-direction:column;justify-content:space-between;align-items:center;background:#0b0b10;color:#fff;border-radius:9px;padding:22px;box-sizing:border-box;text-align:center}
+    .pw-slide-translation {align-self:flex-end;opacity:.78;font-size:12px}
+    .pw-slide-text {font-size:clamp(13px,1.5vw,23px);line-height:1.5;white-space:pre-line;overflow-wrap:anywhere;max-height:65%;overflow:auto}
+    .pw-slide-reference {font-size:12px;opacity:.75}
+    @media(max-width:750px) {.pw-slide-layout {grid-template-columns:1fr}.pw-thumbnails {flex-direction:row;max-height:150px}.pw-thumbnails button {min-width:145px}}
+    .accent {padding:10px;color:white;background:#654398;border:none;border-radius:7px;cursor:pointer}
 </style>
