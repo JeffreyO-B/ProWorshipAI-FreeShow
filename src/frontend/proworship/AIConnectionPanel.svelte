@@ -1,6 +1,9 @@
 <script lang="ts">
     import { checkProWorshipBridge, DEFAULT_BRIDGE_URL } from "./bridge"
+    import { formatScriptureReference, parseScriptureReference } from "./scriptureReference"
 
+    let scriptureInput = ""
+    $: parsedScripture = parseScriptureReference(scriptureInput)
     let expanded = false
     let checking = false
     let connected: boolean | null = null
@@ -40,7 +43,8 @@
             <button type="button" class="pw-test" on:click={testConnection} disabled={checking}>
                 {checking ? "Checking..." : "Test connection"}
             </button>
-            <p class="pw-note">Connection diagnostics only. Transcription and live projection are not yet enabled.</p>
+            <div class="pw-scripture"><label for="pw-scripture-ref">Quick Scripture reference</label><input id="pw-scripture-ref" type="text" bind:value={scriptureInput} placeholder="John 3:16-18" autocomplete="off" /><p aria-live="polite">{!scriptureInput.trim() ? "Enter a Bible reference." : parsedScripture ? "Recognised: " + formatScriptureReference(parsedScripture) : "Reference not recognised."}</p></div>
+            <p class="pw-note">Reference entry only; Bible text and live projection will be connected after library integration.</p>
         </section>
     {/if}
 </div>
@@ -57,5 +61,5 @@
     .pw-endpoint { font-size: 11px; opacity: .75; }
     .pw-test { margin-top: 8px; padding: 8px 10px; border-radius: 6px; background: #7650a4; color: white; border: 1px solid #ad92d5; cursor: pointer; }
     .pw-test:disabled { opacity: .6; cursor: progress; }
-    .pw-note { font-size: 11px; opacity: .8; margin-top: 12px !important; }
+    .pw-scripture { margin-top: 14px; border-top: 1px solid #70538a; padding-top: 10px; }\n    .pw-scripture label { display: block; margin-bottom: 5px; }\n    .pw-scripture input { box-sizing: border-box; width: 100%; background: #362747; border: 1px solid #9677b9; border-radius: 5px; color: white; padding: 8px; }\n    .pw-scripture p { color: #d8c7e9; font-size: 11px; }\n    .pw-note { font-size: 11px; opacity: .8; margin-top: 12px !important; }
 </style>
