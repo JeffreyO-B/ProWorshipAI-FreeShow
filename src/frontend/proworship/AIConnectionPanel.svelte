@@ -11,7 +11,11 @@
     let scriptureInput = ""
     let storyQuery = ""
     let storyCategory = "All"
-    $: storyResults = searchBibleStories(storyQuery, storyCategory)
+    let customStories: { id: string; title: string; category: string; reference: string }[] = []
+    let newStoryTitle = ""
+    let newStoryReference = ""
+    let showStoryForm = false
+    $: storyResults = [...searchBibleStories(storyQuery, storyCategory), ...customStories.filter((story) => (storyCategory === "All" || story.category === storyCategory) && (!storyQuery.trim() || [story.title, story.reference, story.category].some((v) => v.toLowerCase().includes(storyQuery.trim().toLowerCase()))))]
     let translation = "KJV"
     const translations = ["KJV", "NLT", "AMP", "MSG", "TPT", "CEB"]
     let history: string[] = []
@@ -25,12 +29,13 @@
                 if (Array.isArray(data.saved)) saved = data.saved.filter((x: unknown) => typeof x === "string").slice(0, 20)
                 if (Array.isArray(data.history)) history = data.history.filter((x: unknown) => typeof x === "string").slice(0, 20)
                 if (translations.includes(data.translation)) translation = data.translation
+                if (Array.isArray(data.customStories)) customStories = data.customStories.filter((x: any) => x && typeof x.id === "string" && typeof x.title === "string" && typeof x.reference === "string" && x.category === "Custom" && parseScriptureReference(x.reference)).slice(0, 100)
             }
         } catch (error) { console.warn("ProWorshipAI preferences unavailable", error) }
         preferencesLoaded = true
     })
     $: if (preferencesLoaded) {
-        try { localStorage.setItem("proworshipai.freeshow.scripture.preferences.v1", JSON.stringify({ saved, history, translation })) }
+        try { localStorage.setItem("proworshipai.freeshow.scripture.preferences.v1", JSON.stringify({ saved, history, translation, customStories })) }
         catch (error) { console.warn("Could not save ProWorshipAI preferences", error) }
     }
     $: parsedScripture = parseScriptureReference(scriptureInput)
@@ -40,6 +45,14 @@
     let ollamaAvailable: boolean | null = null
     let details = "AI backend has not been checked."
 
+    function addCustomStory() {
+        const parsed = parseScriptureReference(newStoryReference)
+        if (!parsed || !newStoryTitle.trim()) return
+        customStories = [...customStories, { id: "custom_" + Date.now().toString(), title: newStoryTitle.trim().slice(0, 120), category: "Custom", reference: formatScriptureReference(parsed) }].slice(-100)
+        newStoryTitle = ""
+        newStoryReference = ""
+        showStoryForm = false
+    }
     function saveReference() {
         if (!parsedScripture) return
         const reference = formatScriptureReference(parsedScripture)
@@ -122,8 +135,10 @@
                     <label for="pw-story-search">Find a story</label>
                     <input id="pw-story-search" bind:value={storyQuery} placeholder="Daniel, miracles, faith..." />
                     <label for="pw-story-cat">Category</label>
-                    <select id="pw-story-cat" bind:value={storyCategory}>{#each STORY_CATEGORIES as category}<option value={category}>{category}</option>{/each}</select>
+                    <select id="pw-story-cat" bind:value={storyCategory}>{#each [...STORY_CATEGORIES, "Custom"] as category}<option value={category}>{category}</option>{/each}</select>
                     <p class="pw-info">{storyResults.length} matching stories</p>
+                    <button type="button" class="pw-add-story" on:click={() => (showStoryForm = !showStoryForm)}>{showStoryForm ? "Cancel" : "+ Add custom story"}</button>
+                    {#if showStoryForm}<div class="pw-story-form"><label for="pw-new-story">Story name</label><input id="pw-new-story" bind:value={newStoryTitle} placeholder="A new Bible story" /><label for="pw-new-ref">Bible reference</label><input id="pw-new-ref" bind:value={newStoryReference} placeholder="Acts 12:1-19" /><button type="button" class="pw-add-story" disabled={!newStoryTitle.trim() || !parseScriptureReference(newStoryReference)} on:click={addCustomStory}>Save story</button></div>{/if}
                     {#each storyResults as story (story.id)}<button type="button" class="pw-history" on:click={() => useReference(story.reference)}><strong>{story.title}</strong><small>{story.reference} · {story.category}</small></button>{/each}
                     <p class="pw-footnote">Choose a story to load its reference into Quick Bible. Passage text and projection are not yet connected.</p>
                 {:else if activeTab === "ai"}
@@ -176,5 +191,5 @@
     .pw-footnote {font-size:11px;line-height:1.5;color:#a99bbf;margin-top:17px}.pw-info {color:#c9bdd9;line-height:1.6;overflow-wrap:anywhere}
     .pw-dot {height:9px;width:9px;background:#d29e70;border-radius:50%}.pw-dot.online {background:#66d7a3}.pw-status {display:flex;align-items:center;gap:12px;background:#282039;border-radius:11px;padding:13px;margin-bottom:15px}.pw-status div {display:flex;flex-direction:column;gap:3px}.pw-status small {font-size:11px;color:#b8a7d1}
     .pw-history strong,.pw-history small {display:block;} .pw-history small {color:#ae98ca;margin-top:4px;font-size:11px;}
-    .pw-history {display:block;width:100%;text-align:left;color:#e7dafa;background:#2a2438;border:1px solid #453658;border-radius:9px;margin:7px 0;padding:10px}
+    .pw-add-story {margin:7px 0 12px;background:#523977;color:white;border:1px solid #8763b0;border-radius:9px;padding:8px 12px}\n    .pw-story-form {margin:5px 0 12px;padding:12px;background:#292136;border:1px solid #4d3d68;border-radius:11px}\n    .pw-add-story:disabled {opacity:.4;cursor:default}\n    .pw-history {display:block;width:100%;text-align:left;color:#e7dafa;background:#2a2438;border:1px solid #453658;border-radius:9px;margin:7px 0;padding:10px}
 </style>
