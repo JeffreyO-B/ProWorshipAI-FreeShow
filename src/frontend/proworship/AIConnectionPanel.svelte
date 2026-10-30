@@ -157,11 +157,11 @@
     .pw-launch {display:flex;align-items:center;gap:10px;padding:8px 13px;border:1px solid #9672ce;border-radius:14px;color:#fff;background:linear-gradient(120deg,#5a3296,#32204f);box-shadow:0 8px 25px #0007;font-weight:700}
     .pw-launch-mark,.pw-mark {display:grid;place-items:center;background:linear-gradient(140deg,#a879ed,#6941a0);color:white;font-weight:800;border-radius:9px}
     .pw-launch-mark {width:24px;height:24px}.pw-chevron {margin-left:10px;opacity:.8}
-    .pw-panel {width:min(380px,calc(100vw - 32px));max-height:min(620px,calc(100vh - 115px));display:flex;flex-direction:column;margin-bottom:10px;background:#191725;border:1px solid #4d4167;border-radius:18px;overflow:hidden;box-shadow:0 20px 65px #000a}
+    .pw-panel {width:min(520px,calc(100vw - 32px));max-height:min(640px,calc(100vh - 120px));display:flex;flex-direction:column;margin-bottom:10px;background:#191725;border:1px solid #4d4167;border-radius:18px;overflow:hidden;box-shadow:0 20px 65px #000a}
     .pw-header {display:flex;align-items:center;gap:12px;padding:16px;background:linear-gradient(110deg,#32214e,#211b31)}
     .pw-mark {height:36px;width:36px;font-size:20px}.pw-title {display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.pw-title strong {font-size:16px}.pw-title small {color:#bcaed5;font-size:11px}
     .pw-icon {border:0;background:#ffffff13;color:white;border-radius:9px;padding:7px 11px}
-    .pw-tabs {display:flex;gap:4px;padding:8px 12px;background:#201b2d}.pw-tabs button {flex:1;border:0;background:transparent;color:#bfb2d1;border-radius:9px;padding:10px 5px}.pw-tabs button.active {color:white;background:#674495;font-weight:700}
+    .pw-tabs {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:8px 12px;background:#201b2d}.pw-tabs button {flex:1;border:0;background:transparent;color:#bfb2d1;border-radius:9px;padding:10px 5px}.pw-tabs button.active {color:white;background:#674495;font-weight:700}
     .pw-body {padding:18px;overflow-y:auto;min-height:230px}.pw-section-label {font-size:10px;color:#ae91da;font-weight:800;letter-spacing:.12em;margin-bottom:13px}.pw-space {margin-top:20px}
     label {display:block;color:#dcd2ea;font-weight:600;font-size:12px;margin-bottom:7px}
     input,select {box-sizing:border-box;color:#fff;background:#2b253b;border:1px solid #514465;border-radius:10px;padding:11px;outline:none}
