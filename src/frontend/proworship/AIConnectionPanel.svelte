@@ -45,6 +45,9 @@
     let ollamaAvailable: boolean | null = null
     let details = "AI backend has not been checked."
 
+    function removeCustomStory(id: string) {
+        customStories = customStories.filter((story) => story.id !== id)
+    }
     function addCustomStory() {
         const parsed = parseScriptureReference(newStoryReference)
         if (!parsed || !newStoryTitle.trim()) return
@@ -89,6 +92,8 @@
         }
     }
 </script>
+
+<svelte:window on:keydown={(event) => { if (event.key === "Escape" && expanded && !embedded) expanded = false }} />
 
 <div class="pw-workspace" class:embedded>
     {#if expanded}
@@ -139,7 +144,7 @@
                     <p class="pw-info">{storyResults.length} matching stories</p>
                     <button type="button" class="pw-add-story" on:click={() => (showStoryForm = !showStoryForm)}>{showStoryForm ? "Cancel" : "+ Add custom story"}</button>
                     {#if showStoryForm}<div class="pw-story-form"><label for="pw-new-story">Story name</label><input id="pw-new-story" bind:value={newStoryTitle} placeholder="A new Bible story" /><label for="pw-new-ref">Bible reference</label><input id="pw-new-ref" bind:value={newStoryReference} placeholder="Acts 12:1-19" /><button type="button" class="pw-add-story" disabled={!newStoryTitle.trim() || !parseScriptureReference(newStoryReference)} on:click={addCustomStory}>Save story</button></div>{/if}
-                    {#each storyResults as story (story.id)}<button type="button" class="pw-history" on:click={() => useReference(story.reference)}><strong>{story.title}</strong><small>{story.reference} · {story.category}</small></button>{/each}
+                    {#each storyResults as story (story.id)}<div class="pw-story-item"><button type="button" class="pw-history" on:click={() => useReference(story.reference)}><strong>{story.title}</strong><small>{story.reference} · {story.category}</small></button>{#if story.category === "Custom"}<button type="button" class="pw-story-remove" aria-label={"Remove " + story.title} on:click={() => removeCustomStory(story.id)}>×</button>{/if}</div>{/each}
                     <p class="pw-footnote">Choose a story to load its reference into Quick Bible. Passage text and projection are not yet connected.</p>
                 {:else if activeTab === "ai"}
                     <div class="pw-section-label">LOCAL AI ENGINE</div>
@@ -191,5 +196,5 @@
     .pw-footnote {font-size:11px;line-height:1.5;color:#a99bbf;margin-top:17px}.pw-info {color:#c9bdd9;line-height:1.6;overflow-wrap:anywhere}
     .pw-dot {height:9px;width:9px;background:#d29e70;border-radius:50%}.pw-dot.online {background:#66d7a3}.pw-status {display:flex;align-items:center;gap:12px;background:#282039;border-radius:11px;padding:13px;margin-bottom:15px}.pw-status div {display:flex;flex-direction:column;gap:3px}.pw-status small {font-size:11px;color:#b8a7d1}
     .pw-history strong,.pw-history small {display:block;} .pw-history small {color:#ae98ca;margin-top:4px;font-size:11px;}
-    .pw-add-story {margin:7px 0 12px;background:#523977;color:white;border:1px solid #8763b0;border-radius:9px;padding:8px 12px}\n    .pw-story-form {margin:5px 0 12px;padding:12px;background:#292136;border:1px solid #4d3d68;border-radius:11px}\n    .pw-add-story:disabled {opacity:.4;cursor:default}\n    .pw-history {display:block;width:100%;text-align:left;color:#e7dafa;background:#2a2438;border:1px solid #453658;border-radius:9px;margin:7px 0;padding:10px}
+    .pw-story-item {display:flex;align-items:center;gap:7px}.pw-story-item .pw-history {flex:1;min-width:0}.pw-story-remove {background:transparent;color:#d8bceb;border:1px solid #554267;border-radius:8px;padding:8px 11px}\n    .pw-add-story {margin:7px 0 12px;background:#523977;color:white;border:1px solid #8763b0;border-radius:9px;padding:8px 12px}\n    .pw-story-form {margin:5px 0 12px;padding:12px;background:#292136;border:1px solid #4d3d68;border-radius:11px}\n    .pw-add-story:disabled {opacity:.4;cursor:default}\n    .pw-history {display:block;width:100%;text-align:left;color:#e7dafa;background:#2a2438;border:1px solid #453658;border-radius:9px;margin:7px 0;padding:10px}
 </style>
