@@ -18,8 +18,16 @@ export function parseScriptureReference(value: string): ScriptureSelection | nul
     if (chapter < 1 || chapter > 150 || (startVerse !== null && (startVerse < 1 || startVerse > 176))) return null
     if ((otherChapter !== null && (otherChapter < chapter || otherChapter > 150)) || (endVerse !== null && (endVerse < 1 || endVerse > 176))) return null
     if (endVerse !== null && otherChapter === null && startVerse !== null && endVerse < startVerse) return null
+    if (endVerse !== null && startVerse === null) return null
     return { book, chapter, startVerse, endVerse, endChapter: otherChapter }
 }
 export function formatScriptureReference(r: ScriptureSelection): string {
     return r.book + " " + r.chapter + (r.startVerse === null ? "" : ":" + r.startVerse + (r.endVerse === null ? "" : "-" + (r.endChapter !== null ? r.endChapter + ":" : "") + r.endVerse))
+}
+
+/** Autocomplete choices with consistent prefix matching. */
+export function suggestBibleBooks(input: string, limit = 6): string[] {
+    const needle = clean(input.trim())
+    if (!needle) return []
+    return bookNames.filter((book) => clean(book).startsWith(needle)).slice(0, limit)
 }
