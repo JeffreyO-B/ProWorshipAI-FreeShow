@@ -1,5 +1,7 @@
 <script lang="ts">
     import AiFloating from "./ai/components/floating/AiFloating.svelte"
+    import OperatorNavigation from "./proworship/OperatorNavigation.svelte"
+    import OperatorLibrary from "./proworship/OperatorLibrary.svelte"
     import { customActionActivation } from "./components/actions/actions"
     import DrawTabs from "./components/draw/DrawTabs.svelte"
     import Navigation from "./components/edit/Navigation.svelte"
@@ -18,6 +20,8 @@
     import { activeEdit, activePage, activeProfile, activeProject, activeShow, activeStage, ai, currentWindow, editMode, focusMode, loaded, os, projectView, resized, showChangeProfileMenu, showsCache, special } from "./stores"
     import { DEFAULT_WIDTH } from "./utils/common"
 
+    type OperatorSection = "service" | "bible" | "songs" | "media" | "ai"
+    let operatorSection: OperatorSection = "service"
     $: page = $activePage
     $: isWindows = !$currentWindow && $os.platform === "win32"
 
@@ -35,14 +39,19 @@
 <div class="column">
     {#if !$focusMode}
         <Top {isWindows} />
+        {#if page === "show"}
+            <OperatorNavigation section={operatorSection} onSelect={(value) => (operatorSection = value)} />
+        {/if}
     {/if}
     <div class="row">
         <Resizeable id="leftPanel">
             <div class="left">
                 {#if page === "show"}
-                    {#key $activeProfile}
-                        <Projects />
-                    {/key}
+                    <OperatorLibrary section={operatorSection}>
+                        {#key $activeProfile}
+                            <Projects />
+                        {/key}
+                    </OperatorLibrary>
                 {:else if page === "edit"}
                     <Navigation />
                 {:else if page === "stage"}
