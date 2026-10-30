@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { OperatorSection } from "./OperatorLibrary.svelte"
+    type OperatorSection = "service" | "bible" | "songs" | "media" | "ai"
     export let section: OperatorSection
     export let onSelect: (section: OperatorSection) => void
     const sections: { id: OperatorSection; name: string }[] = [
