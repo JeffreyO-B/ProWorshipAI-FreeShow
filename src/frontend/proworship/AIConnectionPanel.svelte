@@ -1,12 +1,16 @@
 <script lang="ts">
     import { checkProWorshipBridge, DEFAULT_BRIDGE_URL } from "./bridge"
     import { formatScriptureReference, parseScriptureReference, suggestBibleBooks } from "./scriptureReference"
+    import { searchBibleStories, STORY_CATEGORIES } from "./bibleStories"
 
     export let embedded = false
-    type Tab = "scripture" | "ai" | "activity"
+    type Tab = "scripture" | "stories" | "ai" | "activity"
     let expanded = embedded
     let activeTab: Tab = "scripture"
     let scriptureInput = ""
+    let storyQuery = ""
+    let storyCategory = "All"
+    $: storyResults = searchBibleStories(storyQuery, storyCategory)
     let translation = "KJV"
     const translations = ["KJV", "NLT", "AMP", "MSG", "TPT", "CEB"]
     let history: string[] = []
@@ -65,6 +69,7 @@
             </header>
             <nav class="pw-tabs" aria-label="ProWorshipAI sections">
                 <button type="button" class:active={activeTab === "scripture"} on:click={() => (activeTab = "scripture")}>Scripture</button>
+                <button type="button" class:active={activeTab === "stories"} on:click={() => (activeTab = "stories")}>Stories</button>
                 <button type="button" class:active={activeTab === "ai"} on:click={() => (activeTab = "ai")}>AI Engine</button>
                 <button type="button" class:active={activeTab === "activity"} on:click={() => (activeTab = "activity")}>Library</button>
             </nav>
@@ -94,6 +99,15 @@
                         <button type="button" disabled={!parsedScripture} on:click={copyReference}>Copy</button>
                     </div>
                     <p class="pw-footnote">Reference management is active. Translation text, Preview and Live will become available when the original libraries and FreeShow output adapter are connected.</p>
+                {:else if activeTab === "stories"}
+                    <div class="pw-section-label">BIBLE STORIES</div>
+                    <label for="pw-story-search">Find a story</label>
+                    <input id="pw-story-search" bind:value={storyQuery} placeholder="Daniel, miracles, faith..." />
+                    <label for="pw-story-cat">Category</label>
+                    <select id="pw-story-cat" bind:value={storyCategory}>{#each STORY_CATEGORIES as category}<option value={category}>{category}</option>{/each}</select>
+                    <p class="pw-info">{storyResults.length} matching stories</p>
+                    {#each storyResults as story (story.id)}<button type="button" class="pw-history" on:click={() => useReference(story.reference)}><strong>{story.title}</strong><small>{story.reference} · {story.category}</small></button>{/each}
+                    <p class="pw-footnote">Choose a story to load its reference into Quick Bible. Passage text and projection are not yet connected.</p>
                 {:else if activeTab === "ai"}
                     <div class="pw-section-label">LOCAL AI ENGINE</div>
                     <div class="pw-status"><span class:online={connected === true} class="pw-dot"></span><div><strong>{connected === null ? "Not checked" : connected ? "Connected" : "Offline"}</strong><small>{DEFAULT_BRIDGE_URL}</small></div></div>
@@ -140,5 +154,5 @@
     .pw-actions {display:flex;gap:7px;flex-wrap:wrap}.pw-actions button,.pw-body>.primary {border:1px solid #615078;border-radius:9px;padding:10px;background:#332a43;color:white}.pw-actions .primary,.pw-body>.primary {background:#754ab2;border-color:#9469d1;font-weight:700}.pw-actions button:disabled,.pw-body button:disabled {opacity:.4;cursor:default}
     .pw-footnote {font-size:11px;line-height:1.5;color:#a99bbf;margin-top:17px}.pw-info {color:#c9bdd9;line-height:1.6;overflow-wrap:anywhere}
     .pw-dot {height:9px;width:9px;background:#d29e70;border-radius:50%}.pw-dot.online {background:#66d7a3}.pw-status {display:flex;align-items:center;gap:12px;background:#282039;border-radius:11px;padding:13px;margin-bottom:15px}.pw-status div {display:flex;flex-direction:column;gap:3px}.pw-status small {font-size:11px;color:#b8a7d1}
-    .pw-history {display:block;width:100%;text-align:left;color:#e7dafa;background:#2a2438;border:1px solid #453658;border-radius:9px;margin:7px 0;padding:10px}
+    .pw-history strong,.pw-history small {display:block;} .pw-history small {color:#ae98ca;margin-top:4px;font-size:11px;}\n    .pw-history {display:block;width:100%;text-align:left;color:#e7dafa;background:#2a2438;border:1px solid #453658;border-radius:9px;margin:7px 0;padding:10px}
 </style>
