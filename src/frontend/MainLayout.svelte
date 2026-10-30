@@ -160,7 +160,7 @@
         scroll-behavior: smooth;
     }
 
-    .left,
+    .left { background: linear-gradient(180deg, #21192f 0%, #191723 75%); border-right: 1px solid #493660; }\n    .center { border-left: 1px solid #382b48; border-right: 1px solid #382b48; }\n    .left,
     .right {
         position: relative;
 
